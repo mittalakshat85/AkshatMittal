@@ -1,0 +1,291 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Desi Trail – Eat Where Locals Eat</title>
+<style>
+:root {
+  --green:#174d38;
+  --orange:#ed783d;
+  --cream:#fffaf1;
+  --muted:#77766d;
+}
+* {box-sizing:border-box}
+body {
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:var(--cream);
+  color:#242c25;
+}
+header {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:20px 7%;
+  border-bottom:1px solid #e9e2d5;
+}
+.logo {font-size:24px;font-weight:800;color:var(--green)}
+.header-actions {display:flex;gap:10px}
+button {
+  cursor:pointer;
+  border:1px solid #ded9ce;
+  background:white;
+  border-radius:30px;
+  padding:11px 17px;
+  font-size:14px;
+  transition:.2s;
+}
+button:hover {border-color:var(--orange);transform:translateY(-1px)}
+button.active {
+  background:var(--green);
+  color:white;
+  border-color:var(--green);
+}
+main {max-width:850px;margin:55px auto;padding:0 22px}
+h1 {
+  font-size:clamp(38px,7vw,65px);
+  line-height:1.05;
+  letter-spacing:-2px;
+  color:var(--green);
+  margin:0 0 16px;
+}
+.subtitle {color:var(--muted);font-size:17px;line-height:1.6}
+.search {
+  display:flex;
+  gap:10px;
+  margin:30px 0 18px;
+}
+input {
+  min-width:0;
+  width:100%;
+  padding:16px;
+  border:1px solid #ded9ce;
+  border-radius:12px;
+  background:white;
+  font-size:16px;
+  outline-color:var(--orange);
+}
+.primary {
+  background:var(--orange);
+  color:white;
+  border:0;
+  border-radius:12px;
+  font-weight:bold;
+  padding:15px 22px;
+  white-space:nowrap;
+}
+.cities {display:flex;gap:9px;flex-wrap:wrap;margin-bottom:35px}
+section {
+  padding:24px 0;
+  border-top:1px solid #e9e2d5;
+}
+.section-title {font-size:17px;font-weight:bold;margin-bottom:16px}
+.options {display:flex;gap:10px;flex-wrap:wrap}
+.field-row {
+  display:flex;
+  gap:15px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+.counter {
+  display:flex;align-items:center;gap:18px;
+  border:1px solid #ded9ce;
+  border-radius:12px;padding:7px 12px;background:white;
+}
+.counter button {border:0;padding:8px 12px}
+.budget {display:flex;gap:10px;flex:1;min-width:220px}
+.budget input {max-width:180px}
+.result {
+  display:none;
+  background:white;
+  border:1px solid #e9e2d5;
+  padding:22px;
+  border-radius:16px;
+  margin-top:25px;
+  line-height:1.7;
+}
+footer {
+  text-align:center;padding:30px;color:var(--muted);
+  font-size:13px;
+}
+@media(max-width:550px) {
+  header {padding:16px 5%}
+  main {margin:35px auto}
+  .search {flex-direction:column}
+  .primary {width:100%}
+  .header-actions button {padding:9px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">🥾 Desi Trail</div>
+  <div class="header-actions">
+    <button onclick="alert('Nominate your favourite local place!')">💎 Nominate a gem</button>
+    <button onclick="showSaved()">🔖 Saved (<span id="saved">0</span>)</button>
+  </div>
+</header>
+
+<main>
+  <h1>Eat where the locals eat.</h1>
+  <p class="subtitle">
+    Real dhabas, halwais and landmarks — tuned to your time,
+    mood, budget and ride.
+  </p>
+
+  <div class="search">
+    <input id="city" placeholder="Try Murthal, Delhi, Jaipur, Kyoto…">
+    <button class="primary" onclick="buildTrail()">Build my trail →</button>
+  </div>
+
+  <div class="cities">
+    <button onclick="setCity('Sonipat & Murthal')">Sonipat & Murthal</button>
+    <button onclick="setCity('Delhi')">Delhi</button>
+    <button onclick="setCity('Jaipur')">Jaipur</button>
+    <button onclick="setCity('Kyoto')">Kyoto</button>
+  </div>
+
+  <section>
+    <div class="section-title">Interests · pick as many as you like</div>
+    <div class="options" id="interests">
+      <button onclick="toggle(this)">🍽️ Food</button>
+      <button onclick="toggle(this)">🛍️ Shopping</button>
+      <button onclick="toggle(this)">🏛️ History</button>
+      <button onclick="toggle(this)">☕ Chill</button>
+      <button onclick="toggle(this)">🧭 Adventure</button>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title">Who's going</div>
+    <div class="options" id="people">
+      <button onclick="choose(this,'people')">🧍 Solo</button>
+      <button onclick="choose(this,'people')">💑 Couple</button>
+      <button onclick="choose(this,'people')">🧑‍🤝‍🧑 Friends</button>
+      <button onclick="choose(this,'people')">👨‍👩‍👧 Family</button>
+      <button onclick="choose(this,'people')">🧒 With kids</button>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title">People & budget · total for the group</div>
+    <div class="field-row">
+      <div class="counter">
+        <button onclick="changePeople(-1)">−</button>
+        <span>👥 <b id="count">2</b></span>
+        <button onclick="changePeople(1)">+</button>
+      </div>
+      <div class="budget">
+        <input id="budget" type="number" value="3000" min="0" placeholder="Total budget ₹">
+      </div>
+    </div>
+    <div class="options" style="margin-top:14px">
+      <button onclick="setBudget(1000)">₹1,000</button>
+      <button onclick="setBudget(3000)">₹3,000</button>
+      <button onclick="setBudget(6000)">₹6,000</button>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title">Time & travel</div>
+    <div class="options" id="time">
+      <button onclick="choose(this,'time')">🌅 Morning</button>
+      <button onclick="choose(this,'time')">☀️ Afternoon</button>
+      <button onclick="choose(this,'time')">🌇 Evening</button>
+      <button onclick="choose(this,'time')">🌙 Late night</button>
+    </div>
+    <div class="options" id="travel" style="margin-top:15px">
+      <button onclick="choose(this,'travel')">🚶 Walk</button>
+      <button onclick="choose(this,'travel')">🛵 Scooter</button>
+      <button onclick="choose(this,'travel')">🚗 Car</button>
+    </div>
+  </section>
+
+  <button class="primary" style="width:100%" onclick="askLocal()">
+    💬 Ask the Local
+  </button>
+
+  <div class="result" id="result">
+    <h2 id="resultTitle">Your Desi Trail</h2>
+    <p id="resultText"></p>
+    <button onclick="saveTrail()">🔖 Save this trail</button>
+  </div>
+</main>
+
+<footer>Made for curious travellers. Discover the real local flavour. ❤️</footer>
+
+<script>
+let people = 2;
+let saved = 0;
+
+function toggle(btn) {
+  btn.classList.toggle('active');
+}
+function choose(btn, group) {
+  document.querySelectorAll('#'+group+' button')
+    .forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+function setCity(city) {
+  document.getElementById('city').value = city;
+}
+function changePeople(n) {
+  people = Math.max(1, Math.min(30, people+n));
+  document.getElementById('count').textContent = people;
+}
+function setBudget(value) {
+  document.getElementById('budget').value = value;
+}
+function selected(id) {
+  return [...document.querySelectorAll('#'+id+' button.active')]
+    .map(b => b.textContent.trim());
+}
+function buildTrail() {
+  const city = document.getElementById('city').value.trim();
+  if (!city) {
+    alert('Please enter a destination first.');
+    return;
+  }
+  const interests = selected('interests');
+  const group = selected('people');
+  const time = selected('time');
+  const travel = selected('travel');
+  const budget = document.getElementById('budget').value;
+
+  document.getElementById('resultTitle').textContent =
+    'Your trail for '+city;
+  document.getElementById('resultText').textContent =
+    'Destination: '+city+
+    '. Interests: '+(interests.join(', ') || 'Explore everything')+
+    '. Group: '+(group[0] || 'Not selected')+
+    '. People: '+people+
+    '. Total budget: ₹'+(budget || 'Not specified')+
+    '. Time: '+(time[0] || 'Flexible')+
+    '. Travel: '+(travel[0] || 'Flexible')+
+    '. This demo collects your preferences; live local recommendations require a connected places service.';
+  document.getElementById('result').style.display = 'block';
+  document.getElementById('result').scrollIntoView({behavior:'smooth'});
+}
+function askLocal() {
+  document.getElementById('resultTitle').textContent = '💬 Ask the Local';
+  document.getElementById('resultText').textContent =
+    'Tell us what you want to discover in '+
+    (document.getElementById('city').value || 'your destination')+
+    '. This standalone demo does not include a live AI connection.';
+  document.getElementById('result').style.display = 'block';
+  document.getElementById('result').scrollIntoView({behavior:'smooth'});
+}
+function saveTrail() {
+  saved++;
+  document.getElementById('saved').textContent = saved;
+  alert('Trail saved for this session!');
+}
+function showSaved() {
+  alert('Saved trails: '+saved);
+}
+</script>
+</body>
+</html>
